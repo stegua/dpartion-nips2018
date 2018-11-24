@@ -30,3 +30,7 @@
 *.exe
 *.out
 *.app
+*.aux
+*.bbl
+*.blg
+*.log
