@@ -29,85 +29,147 @@
 	\begin{abstract}	
 	\large{	
 		\begin{itemize}		
-			\item[] \tgr{{\bf TASK}: To compute the distance between two $d$-dimensional histograms having $n$ bins. For instance, images are 2-dimensional histograms with $n$ bins (pixels)}
+			\item[] \cya{{\bf TASK}: To compute the distance between two $d$-dimensional histograms having $n$ bins. For instance, images are 2-dimensional histograms with $n$ bins (pixels)}
 			\item[] \tb{{\bf PROBLEM}: The mathematical tool used to compute this distance requires the solution of an optimization problem with up to $n^2$ variables}
 			\item[] \tre{{\bf IDEA}: To exploit the structure of the cost function in order to reduce the number of variables of the optimization problem}
 		\end{itemize}}
 	\end{abstract}
 	
-\section{Optimal Transport} 
- The optimal transport is a tool that is nowadays used to compute distances between images. For example the $W_2$ distance is used in image processing, but it is still a problem to compute $W_2$ efficiently. 
+\section{Kantorovich-Wasserstein distance} 
+
+\begin{itemize}
+\item[] 
+The \tre{Kantorovich-Wasserstein distance}
+is a metric  between
+probability distributions or  \tgr{d-dimensional histograms}.
+%\item[] Among various applications, 
+%this metric is used in  \tgr{image processing}, by coding  
+% images as $2D$ normalized histograms. 
+\end{itemize}
+
+%The optimal transport is a tool that is nowadays used to compute distances between images. 
+%For example the $W_2$ distance is used in image processing, but it is still a problem to compute $W_2$ efficiently. 
+
+
+
+
+% The optimal transport is a tool that is nowadays used to compute distances between images. 
+%For example the $W_2$ distance is used in image processing, but it is still a problem to compute $W_2$ efficiently. 
 
  \begin{figure}
      \centering
      {\includegraphics[width=0.35\columnwidth]{images/intro_disc}\label{<figure1>}}
-	 \hspace{0.05\columnwidth}
-     {\includegraphics[width=0.45\columnwidth]{images/fig3}\label{<figure2>}}
-     \caption{Left: Blablabla. Right: blablabla}
+	 \hspace{0.09\columnwidth}
+     {\includegraphics[width=0.5\columnwidth]{images/fig3}\label{<figure2>}}
+     \caption{Left: transport map $\pi$  (green dots) between $1D $-histograms (red and blue dots) with $n=5$ bins. 
+     Right:
+     bipartite graph associated to  constrained optimization problem used to compute the
+     Kantorovich-Wasserstein distance for $2D $-histograms with $n=9$ bins}
      \label{steady_state}
 \end{figure}
 
- The problem outline is the following: given two different configurations, that we will represent with two probability measures, we want to rearrange one into the other one. 
 
-For the sake of clarity and brevity we will work with $2D$ grids.\newline
+
+%As shown in Figure \ref{steady_state} (left) for $1D$-histograms, 
+The idea of 
+the Kantorovich-Wasserstein distance is to find 
+ the \tb{optimal} way to map a probability $\mu$ to a probability $\nu$ where   \tgr{moving a unit mass from $x$ to $y$ costs $c_{x,y}$}.
+ Figure \ref{steady_state} (left).
+ 
+%For the sake of clarity and brevity we will work with $2D$ grids.\newline
 	
-We want to find the optimal way to map a probability $\mu$ to a probability $\nu$ where moving a unit mass from $x$ to $y$ costs $c(x, y)=(x_1-y_1)^2 + (x_2-y_2)^2$, so we consider
+%We want to find the optimal way to map a probability $\mu$ to a probability $\nu$ where moving a unit mass from $x$ to $y$ 
+Whenever the cost  is \tre{$c_{x,y}=\|x-y\|_2^2$}, % $c_{x,y}=(x_1-y_1)^2 + (x_2-y_2)^2$, 
+one gets the \tre{Wasserstein distance of order 2}
+\tre{
 \[
-W_2(\mu,\nu) := \min \sum_{x \in X}\sum_{y\in Y}c(x,y) \pi_{x,y}
-\]
-where the minimum is taken over all the probability measures $\pi_{x,y}$ such that
+W_2(\mu,\nu) := \min \sum_{x}\sum_{y}c_{x,y} \pi_{x,y}
+\]}
+where the minimum is over all the probability measures $\pi$ with \tgr{marginals $\nu$ and $\mu$},  i.e. 
+%$\sum_{x}\pi_{x,y}=\nu_y$ and $\sum_{y}\pi_{x,y}= \mu_x$.
 \[
-\sum_{x \in X}\pi_{x,y}=\nu_y, \;\;\;\;\; \emph{and}  \;\;\;\;\; \sum_{y \in Y}\pi_{x,y}= \mu_x.
+\sum_{x}\pi_{x,y}=\nu_y, \;\;\;\;\; \emph{and}  \;\;\;\;\; \sum_{y}\pi_{x,y}= \mu_x.
 \]
 
-This can be done only for some images (we can compute this quantity only when they have equal mass), but actually it can applied to each image, also to histograms, if we normalize them. 
 
 
-\section{Our Reformulation}
-The standard approach to compute $W_2$ distances between $2D$ histograms with $n = N^2$ bins can be seen as an Uncapacitated Min Cost Flow problem on a bipartite graph, with $2n$ nodes and $n^2$ arcs, and can then be solved in $O(n^3 \log (n))$ time.\newline
+The computation of  $W_2$ distances between  histograms with $n$ bins
+requires the solution of a \tre{constrained optimization problem}.
+%, which is usually
+%\tgr{computationally too heavy} even for moderate size $n$. 
 
-Those huge numbers are due to the large amount of connections we need, as showed in the following figure.
+
+Indeed, the standard approach to compute $W_2$ distances between $2D$ histograms with $n$ bins is to solve 
+the corresponding 
+ \tb{uncapacitated min cost flow problem} \cite{GG1} on a  \tre{bipartite graph}, with  \tre{$2n$ nodes} 
+ (2 times the number of bins) and  \tre{$n^2$ arcs} (one for all the possible costs $c_{x,y}$).
+ See Figure  \ref{steady_state} (right). 
+ \newline
+ 
+The solution of this problem requires $O(n^3 \log (n))$ time, which 
+for large $n$ is \tgr{computationally too heavy}.
+ 
+
+\section{Our contribution}
+
+In \cite{GG2}  we  propose a novel approach for computing 
+the $W_2$ distance 
+ that exploits \tb{the structure of the cost} function to \tre{reduce the number of arcs}. 
 
 \begin{figure}[!t]
 	\centering
-	\includegraphics[width=0.55\columnwidth]{images/fig6}
+	\includegraphics[width=0.75\columnwidth]{images/fig6}
+	 \caption{$3-$partite graph reformulation for the computation of $W_2$}
+     \label{Figure2}
 \end{figure}
 
-In our paper we present a novel approach to this computation that exploits the structure of the cost function to reduce the number of connections needed.\newline
 
-In fact, since the cost function is the sum of two independent contributes, we can describe each transport from a generic point to another one as the concatenation of two transports along the two main directions.
+Since the cost function is \tb{separable}, 
+$c_{x,y}=(x_1-y_1)^2 + (x_2-y_2)^2$, it
+can be computed as the \tb{concatenation} of  the costs  along the \tb{two main directions}:
+$(x_1,x_2) \to (y_1,x_2)$ and $(y_1,x_2) \to (y_1,y_2)$. See Figure \ref{Figure2}. 
+\newline
 
-As a consequence of this fact, we can show that the $W_2$ distance can be computed as a flux problem on a $3-$partite graph, as illustrated in the following picture.
+{\large \tre{{\bf CONTRIBUTION:}}
+\textit{
+We prove that 
+ the $W_2$ distance
+between \tre{$d$-dimensional}  histograms can 
+be computed as a flow problem 
+on   \tre{$(d+1)$-partite graph},  with   $(d+1)n$ nodes
+  and  \tre{$dn^{1+\frac{1}{d}}$ arcs}. }}
+% See Figure \ref{Figure2} (right).
 
 
 
-In this way, rather than connect each bin to each bin, we effectuate two connections: the first one between each bin and each other bin aligned along the first main direction and the second one between bins aligned along the second main direction.\newline
-
-This simple change of formulation reduces drastically the computational cost, but there is even more:
 \begin{itemize}
-	\item This reasoning is easily adaptable to grids of any dimension $d$ and the method escalates very well with it: while the old method required $n^2$ connections, this methods only requires $dn^{1+\frac{1}{d}}$.
-	\item We can also adapt this method to each cost function that is separable, \emph{i.e.} can be written as sum of independent contributions.
-	\item  As showed in the next section, this method outperforms all known approximated methods and still provides us the exact computation.
+	\item Our method requires  \tre{$dn^{1+\frac{1}{d}}$ arcs} while the standard bipartite graph method requires $n^2$.
+	\item The method can be adapted  to any \tb{cost function} that is \tb{separable}, \emph{i.e.} can be written as a sum of independent contributions.
+	\item  The method provides an \tre{exact solution}. 
+	%and still  outperforms  all known exact and approximated methods.
 \end{itemize}
 
-
 \section{Numerical Results}
+As problem instances, we use the gray scale images proposed by
+the DOTMark benchmark, and a set of $d$-dimensional histograms obtained by biomedical data
+measured by flow cytometry.
 
 \begin{table}
 \caption{Comparison on Flow Cytometry data with increasing value of $d$.}
 	\label{tab:3}
 \centering
 {\renewcommand{\arraystretch}{1.2}
-\begin{tabular}{llrrrrrrr}
-     & & & \multicolumn{3}{c}{Bipartite Graph} & \multicolumn{3}{c}{$(d+1)$-partite Graph} \\
+\begin{tabular}{l@{\hskip 0.4in}l@{\hskip 0.4in}r@{\hskip 0.4in}rrr@{\hskip 0.4in}rr@{\hskip 0.4in}r}
+     \multicolumn{3}{c}{} & \multicolumn{3}{c}{Bipartite Graph} & \multicolumn{3}{c}{$(d+1)$-partite Graph} \\
+	 \hline
 N & $d$ & $n$ & $|V|$ & $|A|$ & Runtime & $|V|$ & $|A|$ & Runtime  \\
 \hline
-$16$ & 2 & 256 & 512 & 65\,536 & 0.024 (0.01) & 768 & 8\,192 & 0.003 (0.00) \\
-& 3 & 4\,096 & 8\,192 & 16\,777\,216& 38.2 (14.0)   & 16\,384 & 196\,608& 0.12 (0.02)  \\
-& 4 & 65\,536 & \multicolumn{3}{c}{{\it out-of-memory}} & 327\,680 & 4\,194\,304& 4.8 (0.84) \\
+$16$ & 2 & 256 & 512 & 65\,536 & 0.024 (0.01) & 768 & 8\,192 & {\bf 0.003 (0.00)} \\
+& 3 & 4\,096 & 8\,192 & 16\,777\,216& 38.2 (14.0)   & 16\,384 & 196\,608& {\bf 0.12 (0.02)}  \\
+& 4 & 65\,536 & \multicolumn{3}{c}{{\it out-of-memory}} & 327\,680 & 4\,194\,304& {\bf 4.8 (0.84)} \\
  \hline\noalign{\smallskip}
-$32$ & 2 & 1\,024 & 2\,048 & 1\,048\,756 & 0.71 (0.14) & 3072 & 65\,536& 0.04 (0.01) \\
-& 3 & 32\,768& \multicolumn{3}{c}{{\it out-of-memory}}   & 131\,072 & 3\,145\,728& 5.23 (0.69)  \\
+$32$ & 2 & 1\,024 & 2\,048 & 1\,048\,756 & 0.71 (0.14) & 3072 & 65\,536& {\bf 0.04 (0.01)} \\
+& 3 & 32\,768& \multicolumn{3}{c}{{\it out-of-memory}}   & 131\,072 & 3\,145\,728& {\bf 5.23 (0.69)}  \\
  \hline\noalign{\smallskip}
  \end{tabular}}
 \end{table}
@@ -140,41 +202,43 @@ $32$ & 2 & 1\,024 & 2\,048 & 1\,048\,756 & 0.71 (0.14) & 3072 & 65\,536& 0.04 (0
 \end{figure}
 
 \begin{table}[t!]
-\caption{Comparison of different approaches on $32 \times 32$ images. The runtime (in seconds) is given as ``Mean (StdDev)''.
-The gap to the optimal value {\it opt} is computed as $\frac{UB-opt}{opt}\cdot 100$, where $UB$ is the upper bound computed by Sinkhorn's algorithm.
+\caption{Comparison on $32 \times 32$ images. The runtime (in secs) is given as ``Mean (StdDev)''.
+The gap to the optimum {\it opt} is computed as $\frac{UB-opt}{opt}\cdot 100$, where $UB$ is the upper bound computed by Sinkhorn's algorithm.
 Each row reports the averages over 45 instances.
 \label{tab:1}}
 \centering
 {\renewcommand{\arraystretch}{1.2}
-\begin{tabular}{lccrcrcc}
-      & \multicolumn{1}{c}{EMD\cite{Rubner98}} &  \multicolumn{4}{c}{Sinkhorn \cite{Cuturi2013}} & \multicolumn{1}{c}{Bipartite} & \multicolumn{1}{c}{$3$-partite} \\
-	  & & \multicolumn{2}{c}{$\lambda=1$} & \multicolumn{2}{c}{$\lambda=1.5$} &  &  \\
+\begin{tabular}{l|c|@{\hskip 0.3in}cr|@{\hskip 0.3in}cr|@{\hskip 0.3in}c|@{\hskip 0.3in}c}
+      \multicolumn{1}{c}{}& \multicolumn{1}{c}{EMD\cite{Rubner98}} &  \multicolumn{4}{c}{Sinkhorn \cite{Cuturi2013}} & \multicolumn{1}{c}{Bipartite} & \multicolumn{1}{c}{$3$-partite} \\
+	  \multicolumn{1}{c}{}& \multicolumn{1}{c}{}& \multicolumn{2}{c}{$\lambda=1$} & \multicolumn{2}{c}{$\lambda=1.5$} &  \multicolumn{1}{c}{}&  \\
+	  \hline
 Image Class & Runtime & Runtime & Gap & Runtime & Gap & Runtime & Runtime \\
 \hline
-Classic    & 24.0 (3.3) & 6.0 (0.5) & 17.3\% & 8.9 (0.7) & 9.1\%  & 0.54 (0.05) & 0.07 (0.01)\\
-Microscopy & 35.0 (3.3) & 3.5 (1.0) &  2.4\% & 5.3 (1.4) & 1.2\% & 0.55 (0.03) & 0.08 (0.01)\\
-Shapes     & 25.2 (5.3) & 1.6 (1.1) &  5.6\% & 2.5 (1.6) & 3.0\% & 0.50 (0.07) & 0.05 (0.01)\\
+Classic    & 24.0 (3.3) & 6.0 (0.5) & 17.3\% & 8.9 (0.7) & 9.1\%  & 0.54 (0.05) & {\bf 0.07 (0.01)}\\
+Microscopy & 35.0 (3.3) & 3.5 (1.0) &  2.4\% & 5.3 (1.4) & 1.2\% & 0.55 (0.03) & {\bf 0.08 (0.01)}\\
+Shapes     & 25.2 (5.3) & 1.6 (1.1) &  5.6\% & 2.5 (1.6) & 3.0\% & 0.50 (0.07) & {\bf 0.05 (0.01)}\\
  \hline\noalign{\smallskip}
  \multicolumn{8}{c}{} \\
  \end{tabular}}
 \centering
 {\renewcommand{\arraystretch}{1.2}
 \setlength{\tabcolsep}{5pt}
-\begin{tabular}{lcrcrcrc}
-      & \multicolumn{6}{c}{Improved Sinkhorn \cite{Solomon2015,Solomon2018}} & \multicolumn{1}{c}{$3$-partite} \\
-	  & \multicolumn{2}{c}{$\lambda=1$} & \multicolumn{2}{c}{$\lambda=1.25$}  & \multicolumn{2}{c}{$\lambda=1.5$}  &  \\
+\begin{tabular}{l|cr|@{\hskip 0.2in}cr|@{\hskip 0.2in}cr|@{\hskip 0.2in}c}
+  \multicolumn{1}{c}{}    & \multicolumn{6}{c}{Improved Sinkhorn \cite{Solomon2015}} & \multicolumn{1}{c}{$3$-partite} \\
+	\multicolumn{1}{c}{}  & \multicolumn{2}{c}{$\lambda=1$} & \multicolumn{2}{c}{$\lambda=1.25$}  & \multicolumn{2}{c}{$\lambda=1.5$}  &  \\
+\hline
 Image Class     & Runtime           & Gap       & Runtime           & Gap       & Runtime           & Gap       &   Runtime \\
 \hline
- CauchyDensity	&	0.22	(0.15)	&	2.8\%	&	0.33	(0.23)	&	2.0\%	&	0.41	(0.28)	&	1.5\%	&	0.07	(0.01)	\\
- Classic		&	0.20	(0.01)	&	17.3\%	&	0.31	(0.02)	&	12.4\%	&	0.39	(0.03)	&	9.1\%	&	0.07	(0.01)	\\
- GRFmoderate	&	0.19	(0.01)	&	12.6\%	&	0.29	(0.02)	&	9.0\%	&	0.37	(0.03)	&	6.6\%	&	0.07	(0.01)	\\
- GRFrough		&	0.19	(0.01)	&	58.7\%	&	0.29	(0.01)	&	42.1\%	&	0.38	(0.02)	&	31.0\%	&	0.05	(0.01)	\\
- GRFsmooth		&	0.20	(0.02)	&	4.3\%	&	0.30	(0.04)	&	3.1\%	&	0.38	(0.04)	&	2.2\%	&	0.08	(0.01)	\\
- LogGRF			&	0.22	(0.05)	&	1.3\%	&	0.32	(0.08)	&	0.9\%	&	0.40	(0.13)	&	0.7\%	&	0.08	(0.01)	\\
- LogitGRF		&	0.22	(0.02)	&	4.7\%	&	0.33	(0.03)	&	3.3\%	&	0.42	(0.04)	&	2.5\%	&	0.07	(0.02)	\\
- Microscopy 	&	0.18	(0.03)	&	2.4\%	&	0.27	(0.04)	&	1.7\%	&	0.34	(0.05)	&	1.2\%	&	0.08	(0.02)	\\
- Shapes			&	0.11	(0.04)	&	5.6\%	&	0.16	(0.06)	&	4.0\%	&	0.20	(0.07)	&	3.0\%	&	0.05	(0.01)	\\
- WhiteNoise		&	0.18	(0.01)	&	76.3\%	&	0.28	(0.01)	&	53.8\%	&	0.37	(0.02)	&	39.2\%	&	0.04	(0.00)	\\
+ CauchyDensity	&	0.22	(0.15)	&	2.8\%	&	0.33	(0.23)	&	2.0\%	&	0.41	(0.28)	&	1.5\%	&	{\bf 0.07	(0.01)}	\\
+ Classic		&	0.20	(0.01)	&	17.3\%	&	0.31	(0.02)	&	12.4\%	&	0.39	(0.03)	&	9.1\%	&	{\bf 0.07	(0.01)}	\\
+ GRFmoderate	&	0.19	(0.01)	&	12.6\%	&	0.29	(0.02)	&	9.0\%	&	0.37	(0.03)	&	6.6\%	&	{\bf 0.07	(0.01)}	\\
+ GRFrough		&	0.19	(0.01)	&	58.7\%	&	0.29	(0.01)	&	42.1\%	&	0.38	(0.02)	&	31.0\%	&	{\bf 0.05	(0.01)}	\\
+ GRFsmooth		&	0.20	(0.02)	&	4.3\%	&	0.30	(0.04)	&	3.1\%	&	0.38	(0.04)	&	2.2\%	&	{\bf 0.08	(0.01)}	\\
+ LogGRF			&	0.22	(0.05)	&	1.3\%	&	0.32	(0.08)	&	0.9\%	&	0.40	(0.13)	&	0.7\%	&	{\bf 0.08	(0.01)}	\\
+ LogitGRF		&	0.22	(0.02)	&	4.7\%	&	0.33	(0.03)	&	3.3\%	&	0.42	(0.04)	&	2.5\%	&	{\bf 0.07	(0.02)}	\\
+ Microscopy 	&	0.18	(0.03)	&	2.4\%	&	0.27	(0.04)	&	1.7\%	&	0.34	(0.05)	&	1.2\%	&	{\bf 0.08	(0.02)}	\\
+ Shapes			&	0.11	(0.04)	&	5.6\%	&	0.16	(0.06)	&	4.0\%	&	0.20	(0.07)	&	3.0\%	&	{\bf 0.05	(0.01)}	\\
+ WhiteNoise		&	0.18	(0.01)	&	76.3\%	&	0.28	(0.01)	&	53.8\%	&	0.37	(0.02)	&	39.2\%	&	{\bf 0.04	(0.00)}	\\
 \hline\noalign{\smallskip}
  \end{tabular}}
 \end{table}
